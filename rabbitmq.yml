@@ -1,0 +1,41 @@
+---
+### Deploys rabbitmq
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    rabbitmq_version: 3.0.2-1
+  gather_facts: false
+
+  pre_tasks:
+  - name: install python 2
+    raw: sudo bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qy python-minimal)"
+
+  tasks:
+  - name: add erlang offcial apt repository
+    apt_repository: repo='deb https://packages.erlang-solutions.com/ubuntu xenial contrib' state=present
+
+  - name: add erlang trusted key
+    apt_key: url=https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc state=present
+
+  - name: add rabbitmq official apt repository
+    apt_repository: repo='deb https://dl.bintray.com/rabbitmq/debian xenial main' state=present
+
+  - name: add rabbitmq trusted key
+    apt_key: url=https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc state=present
+
+  - name: install package
+    apt: name={{ item }} update_cache=yes state=installed
+    with_items:
+      - esl-erlang
+      - rabbitmq-server
+
+  - name: enable rabbitmq plugins
+    rabbitmq_plugin: names=rabbitmq_management state=enabled
+    notify:
+    - restart rabbitmq
+
+  handlers:
+  - name: restart rabbitmq
+    service: name=rabbitmq-server state=restarted
