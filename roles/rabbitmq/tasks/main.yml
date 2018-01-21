@@ -1,0 +1,23 @@
+---
+
+- name: repository - add rabbitmq repo
+  apt_repository: 
+    repo: 'deb {{ rabbitmq_repo }} {{ ansible_distribution_release | lower}} {{rabbitmq_repo_components}}' 
+    state: present
+
+- name: repository - add rabbitmq key
+  apt_key: 
+    url: "{{ rabbitmq_repo_key_url }}"
+    state: present
+
+- name: packages - install rabbitmq-server
+  apt:
+    pkg: rabbitmq-server
+    update_cache: yes
+    cache_valid_time: 3600
+    state: installed
+
+- name: enable rabbitmq plugins
+  rabbitmq_plugin: names=rabbitmq_management state=enabled
+  notify:
+  - restart rabbitmq

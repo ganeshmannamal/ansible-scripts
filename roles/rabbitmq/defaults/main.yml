@@ -1,0 +1,5 @@
+---
+
+rabbitmq_repo: "https://dl.bintray.com/rabbitmq/debian"
+rabbitmq_repo_key_url: "https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc"
+rabbitmq_repo_components: "main"

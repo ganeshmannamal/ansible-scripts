@@ -1,0 +1,30 @@
+- name: repository - add erlang repo
+  apt_repository:
+    repo: "deb {{ erlang_repo }}{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} {{ erlang_repo_components }}"
+    update_cache: no
+    state: present
+
+- name: repository - add the erlang key
+  apt_key:
+    url: "{{ erlang_repo_key_url | default(omit) }}"
+    keyserver: "{{ erlang_repo_key_server | default(omit) }}"
+    id: "{{ erlang_repo_key_id | default(omit) }}"
+    state: present
+
+- name: packages - install erlang
+  apt:
+    pkg: esl-erlang
+    update_cache: yes
+    cache_valid_time: 3600
+    state: installed
+
+- name: pin - set highest priority for this repository
+  template:
+    dest: /etc/apt/preferences.d/erlang
+    src: pin.j2
+    mode: 0644
+    owner: root
+    group: root
+  when: erlang_pin is defined and
+        erlang_pin
+
